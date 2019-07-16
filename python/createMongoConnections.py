@@ -1,19 +1,31 @@
+import threading
 from pymongo import MongoClient
-from pymongo.errors import ConnectionFailure
 import argparse
 
 
+def worker(num, db):
+    print("Thread number %s" % num)
+    try:
+        db.command('ismaster')
+    except Exception as e:
+        print("Exception: %s" % e)
+    return
+
+
 def main(args):
+    client = MongoClient('mongodb://' + args.mongo + ':27017', maxPoolSize=None)
+    database = client.admin
+    threads = []
     i = 0
     while i < args.max_con:
-        client = MongoClient('mongodb://' + args.mongo + ':27017')
-        try:
-            # The ismaster command is cheap and does not require auth.
-            client.admin.command('ismaster')
+        t = threading.Thread(target=worker, args=(i, database))
+        threads.append(t)
+        # Start thread.
+        t.start()
+        i = i+1
 
-        except ConnectionFailure:
-            print("Server not available")
-        i = i + 1
+    for t in threads:
+        t.join()
 
 
 if __name__ == "__main__":

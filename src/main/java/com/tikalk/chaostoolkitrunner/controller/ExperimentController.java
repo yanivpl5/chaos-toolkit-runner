@@ -21,15 +21,15 @@ public class ExperimentController {
 
     @PostMapping
     public ResponseEntity<String> runExperiment() {
-        try {
-            return new ResponseEntity<>(experimentService.launch(), HttpStatus.OK);
-        } catch (IOException e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        return new ResponseEntity<>(experimentService.launch(), HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<String> getResult(@PathVariable String id) {
-        return new ResponseEntity<>(experimentService.getJournal(id), HttpStatus.OK);
+        String journal = experimentService.getJournal(id);
+        if (journal.equals("active")) {
+            return new ResponseEntity<>("active", HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(journal, HttpStatus.OK);
     }
 }

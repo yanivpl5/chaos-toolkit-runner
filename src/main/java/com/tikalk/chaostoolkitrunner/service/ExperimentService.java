@@ -33,7 +33,7 @@ public class ExperimentService {
     @Value("${experiments.path}")
     private  static final String JOURNAL_JSON_FILE = "journal.json";
 
-    @Value("experiments.path")
+    @Value("${experiments.path}")
     private String experimentPathStr;
 
     private Path experimentPath;
@@ -53,9 +53,6 @@ public class ExperimentService {
 
         String id = uuid.toString();
         Path experimentDir = getExperimentPath(id);
-        Files.createDirectory(experimentDir);
-
-        Path experimentDir = Paths.get(experimentPathStr, id);
         try {
             Files.createDirectory(experimentDir);
         } catch (IOException e) {
@@ -104,23 +101,23 @@ public class ExperimentService {
         if (Files.notExists(experimentPath))
             return Optional.empty();
         else if (Files.notExists(journalPath)) {
-                return Optional.empty();
-        }
-        else {
+            return Optional.empty();
+        } else {
             List<String> journalLines = Files.readAllLines(journalPath);
             return Optional.of(String.join(" ", journalLines));
         }
-    public String getJournal(String id) {
-        String experiment = experiments.get(id);
-        if (experiment.equals("active")){
-            return "active";
-        }
-        String fileContent = "error";
-        try {
-            fileContent = FileUtils.readFileToString(new File(experimentPath.toString() + "/" + id + "journal.json") , "UTF-8");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return fileContent;
     }
+//    public String getJournal(String id) {
+//        String experiment = experiments.get(id);
+//        if (experiment.equals("active")){
+//            return "active";
+//        }
+//        String fileContent = "error";
+//        try {
+//            fileContent = FileUtils.readFileToString(new File(experimentPath.toString() + "/" + id + "journal.json") , "UTF-8");
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        return fileContent;
+//    }
 }

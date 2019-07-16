@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.util.Optional;
 
 @RestController
 @RequestMapping(value = "gr7/experiment", produces = "application/json")
@@ -30,6 +31,15 @@ public class ExperimentController {
 
     @GetMapping("/{id}")
     public ResponseEntity<String> getResult(@PathVariable String id) {
-        return new ResponseEntity<>(experimentService.getJournal(id), HttpStatus.OK);
+        Optional<String> journalOptional = null;
+        try {
+            journalOptional = experimentService.getJournal(id);
+        } catch (IOException e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        return journalOptional.map(
+                s -> new ResponseEntity<>(s, HttpStatus.OK))
+                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 }

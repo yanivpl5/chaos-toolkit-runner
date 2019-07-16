@@ -16,6 +16,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 
@@ -29,6 +31,9 @@ public class ExperimentService {
     @Value("${chaos.runtime}")
     private String chaosRuntime;
     @Value("${experiments.path}")
+    private  static final String JOURNAL_JSON_FILE = "journal.json";
+
+    @Value("experiments.path")
     private String experimentPathStr;
 
     private Path experimentPath;
@@ -47,6 +52,9 @@ public class ExperimentService {
         UUID uuid = UUID.randomUUID();
 
         String id = uuid.toString();
+        Path experimentDir = getExperimentPath(id);
+        Files.createDirectory(experimentDir);
+
         Path experimentDir = Paths.get(experimentPathStr, id);
         try {
             Files.createDirectory(experimentDir);
@@ -79,11 +87,29 @@ public class ExperimentService {
         return id;
     }
 
+    private Path getExperimentPath(String id) {
+        return Paths.get(experimentPathStr, id);
+    }
+
     /**
      * Get the journal with the results of an experiment run
      * @param id Run-id
      * @return Journal JSon
      */
+    public Optional<String> getJournal(String id) throws IOException {
+        Path experimentPath = getExperimentPath(id);
+
+        Path journalPath = Paths.get(experimentPath.toString(), JOURNAL_JSON_FILE);
+
+        if (Files.notExists(experimentPath))
+            return Optional.empty();
+        else if (Files.notExists(journalPath)) {
+                return Optional.empty();
+        }
+        else {
+            List<String> journalLines = Files.readAllLines(journalPath);
+            return Optional.of(String.join(" ", journalLines));
+        }
     public String getJournal(String id) {
         String experiment = experiments.get(id);
         if (experiment.equals("active")){

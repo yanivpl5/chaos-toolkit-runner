@@ -26,10 +26,15 @@ public class ExperimentController {
 
     @GetMapping("/{id}")
     public ResponseEntity<String> getResult(@PathVariable String id) {
-        String journal = experimentService.getJournal(id);
-        if (journal.equals("active")) {
-            return new ResponseEntity<>("active", HttpStatus.NOT_FOUND);
+        Optional<String> journalOptional = null;
+        try {
+            journalOptional = experimentService.getJournal(id);
+        } catch (IOException e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return new ResponseEntity<>(journal, HttpStatus.OK);
+
+        return journalOptional.map(
+                s -> new ResponseEntity<>(s, HttpStatus.OK))
+                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 }
